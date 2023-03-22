@@ -13,11 +13,23 @@ from typing import Callable
 
 
 def solution(func: Callable, start_point: float) -> float: # DO NOT MODIFY FUNCTION NAME    
-    pass ### IMPLEMENT FROM HERE
+    my_lr = 0.8
+    epoch = 45000
+
+    x = torch.tensor(start_point, requires_grad=True)
+    optimizer = torch.optim.Adam([x], lr=my_lr, )
+
+    for i in range(epoch):
+        optimizer.zero_grad()
+        y = func(x)
+        y.backward()
+        optimizer.step()
+    
+    return x.data.item()
     
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     def test_func(x): # function for testing;function for evaluation will be different.
-        return x ** 4
+        return 4 * x ** 4 - 3 * x ** 2 - x + 1
     t = 10*random()
     print(solution(test_func, t))

@@ -13,8 +13,23 @@ from typing import Callable
 
 
 def solution(func: Callable, start_point: float) -> float: # DO NOT MODIFY FUNCTION NAME    
-    pass ### IMPLEMENT FROM HERE
+    lr = 0.001
+    epoch = 10000
+    beta = 0.9
+
+    x = start_point
+    v = 0
+
+    for i in range(epoch):
+        x_tensor = torch.tensor([x + beta * v], requires_grad=True)
+        y = func(x_tensor)
+        y.backward()
+
+        v = beta * v - lr * x_tensor.grad.data.item()
+        x += v
     
+    return x
+
 
 if __name__ == '__main__':
     def test_func(x): # function for testing;function for evaluation will be different.
