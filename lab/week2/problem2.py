@@ -30,34 +30,23 @@ def training(x_train, y_train): # DO NOT MODIFY FUNCTION NAME
     ### IMPLEMENT FROM HERE
     y_train_normalized = [ normalize(y) for y in y_train ]
 
-    x_train_tensors = [ torch.tensor(x, requires_grad=True) for x in x_train ]
-    y_train_tensors = [ torch.tensor(y, requires_grad=True) for y in y_train_normalized ]
-
+    x_train_tensor = torch.tensor(x_train, requires_grad=True).transpose(0, 1)
+    y_train_tensor = torch.tensor(y_train_normalized, requires_grad=True)
+    
     w = torch.tensor([ random() for i in range(len(x_train[0])) ], requires_grad=True)
     b = torch.tensor(random(), requires_grad=True)
     my_lr = 0.1
-    epoch = 70
+    epoch = 100
 
     optimizer = torch.optim.Adam([w, b], lr=my_lr)
 
     for i in range(epoch):
-        #optimizer.zero_grad()
-        #error_mean = torch.tensor(0., requires_grad=True)
+        optimizer.zero_grad()
 
-        for j in range(len(x_train)):
-            optimizer.zero_grad()
-
-            y_tensor = torch.dot(w, x_train_tensors[j]) + b
-
-            error = (y_tensor - y_train_tensors[j]).pow(2).sum()
-            error.backward()
-            optimizer.step()
-
-            #error_mean2 = error_mean + error
-            #error_mean = error_mean2
-
-        #error_mean.backward()
-        #optimizer.step()
+        y_tensor = torch.matmul(w, x_train_tensor) + b
+        error =  (y_tensor - y_train_tensor).pow(2).sum()
+        error.backward()
+        optimizer.step()
 
     return ((w * (y_max - y_min)).tolist(), (b * (y_max - y_min) + y_min).data.item())
 
@@ -66,13 +55,7 @@ def predict(x_train, y_train, x_test): # DO NOT MODIFY FUNCTION NAME
     ### IMPLEMENT FROM HERE
     w, b = training(x_train, y_train)
 
-    result = []
-
-    for i in range(len(x_test)):
-        temp = torch.dot(torch.tensor(w), torch.tensor(x_test[i])) + torch.tensor(b)
-        result.append(temp.data.item())
-
-    return result
+    return torch.matmul(torch.tensor(w), torch.tensor(x_test).transpose(0, 1)) + torch.tensor(b)
 
 if __name__ == "__main__":
     x_train = [[0., 1.], [1., 0.], [2., 2.], [3., 1.], [4., 3.]]
