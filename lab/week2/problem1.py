@@ -1,5 +1,5 @@
 import torch
-from random import random 
+from random import random
 from typing import Callable
 
 ##                         Problem 1                          ##
@@ -14,7 +14,7 @@ from typing import Callable
 
 # NOTE : Feel free to use torch.optim and tensor.
 
-def training(x_train : list[float], y_train : list[float]) -> list[float]: # DO NOT MODIFY FUNCTION NAME
+def training(x_train, y_train): # DO NOT MODIFY FUNCTION NAME
     # Data normalization code (prevents overflow when calculating MSE, prevents underfitting)
     # Note that you need to convert [w, b] to the original scale before returning value
     # w = w * (y_max - y_min)
@@ -24,10 +24,36 @@ def training(x_train : list[float], y_train : list[float]) -> list[float]: # DO 
     normalize = lambda y : (y - y_min)/(y_max - y_min)
 
     ### IMPLEMENT FROM HERE
+    y_train_normalized = [ normalize(y) for y in y_train ]
+
+    w = torch.tensor(random(), requires_grad=True)
+    b = torch.tensor(random(), requires_grad=True)
+    my_lr = 0.1
+    epoch = 1000
+
+    x_train_tensor = torch.tensor(x_train, requires_grad=True)
+    y_train_tensor = torch.tensor(y_train_normalized, requires_grad=True)
+    optimizer = torch.optim.Adam([w, b], lr=my_lr)
+
+    for i in range(epoch):
+        optimizer.zero_grad()
+
+        y_tensor = w * x_train_tensor + b
+        error =  (y_tensor - y_train_tensor).pow(2).sum()
+        error.backward()
+        optimizer.step()
+    
+    return [ w.data.item() * (y_max - y_min), b.data.item() * (y_max - y_min) + y_min ]
 
 
-def predict(x_train : list[float], y_train : list[float], x_test : list[float]) -> list[float]: # DO NOT MODIFY FUNCTION NAME
-    pass ### IMPLEMENT FROM HERE
+
+def predict(x_train, y_train, x_test): # DO NOT MODIFY FUNCTION NAME
+    ### IMPLEMENT FROM HERE
+    w, b = training(x_train, y_train)
+
+    temp = torch.tensor(w) * torch.tensor(x_test) + torch.tensor(b)
+
+    return temp.tolist()
 
 if __name__ == "__main__":
     x_train = [0.0, 1.0, 2.0, 3.0, 4.0]

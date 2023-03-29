@@ -16,7 +16,7 @@ from typing import Callable
 
 # NOTE : Feel free to use torch.optim and tensor.
 
-def training(x_train : list[list[float]], y_train : list[float]) -> tuple[list[float], float]: # DO NOT MODIFY FUNCTION NAME
+def training(x_train, y_train): # DO NOT MODIFY FUNCTION NAME
     # data normalization
     # 1. Prevents overflow when calculating MSE
     # 2. Prevents underfitting
@@ -28,10 +28,51 @@ def training(x_train : list[list[float]], y_train : list[float]) -> tuple[list[f
     normalize = lambda y : (y - y_min)/(y_max - y_min)
     
     ### IMPLEMENT FROM HERE
+    y_train_normalized = [ normalize(y) for y in y_train ]
+
+    x_train_tensors = [ torch.tensor(x, requires_grad=True) for x in x_train ]
+    y_train_tensors = [ torch.tensor(y, requires_grad=True) for y in y_train_normalized ]
+
+    w = torch.tensor([ random() for i in range(len(x_train[0])) ], requires_grad=True)
+    b = torch.tensor(random(), requires_grad=True)
+    my_lr = 0.1
+    epoch = 70
+
+    optimizer = torch.optim.Adam([w, b], lr=my_lr)
+
+    for i in range(epoch):
+        #optimizer.zero_grad()
+        #error_mean = torch.tensor(0., requires_grad=True)
+
+        for j in range(len(x_train)):
+            optimizer.zero_grad()
+
+            y_tensor = torch.dot(w, x_train_tensors[j]) + b
+
+            error = (y_tensor - y_train_tensors[j]).pow(2).sum()
+            error.backward()
+            optimizer.step()
+
+            #error_mean2 = error_mean + error
+            #error_mean = error_mean2
+
+        #error_mean.backward()
+        #optimizer.step()
+
+    return ((w * (y_max - y_min)).tolist(), (b * (y_max - y_min) + y_min).data.item())
 
 
-def predict(x_train : list[list[float]], y_train : list[float], x_test : list[list[float]]) -> list[float]: # DO NOT MODIFY FUNCTION NAME
-    pass ### IMPLEMENT FROM HERE
+def predict(x_train, y_train, x_test): # DO NOT MODIFY FUNCTION NAME
+    ### IMPLEMENT FROM HERE
+    w, b = training(x_train, y_train)
+
+    result = []
+
+    for i in range(len(x_test)):
+        temp = torch.dot(torch.tensor(w), torch.tensor(x_test[i])) + torch.tensor(b)
+        result.append(temp.data.item())
+
+    return result
 
 if __name__ == "__main__":
     x_train = [[0., 1.], [1., 0.], [2., 2.], [3., 1.], [4., 3.]]
