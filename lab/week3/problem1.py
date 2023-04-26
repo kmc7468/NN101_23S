@@ -14,8 +14,8 @@ from typing import Callable
 ##                                                            ##
 
 # NOTE : 1. Feel free to use torch.optim and tensor.
-#        2. In this problem, we will only grade 'predict' function.
-#           Function 'training' is only for modularization.
+#        2. In this problem, we will only grade "predict" function.
+#           Function "training" is only for modularization.
 
 def training(x_train, y_train): # DO NOT MODIFY FUNCTION NAME
     x_train_tensor = torch.tensor(x_train, requires_grad=True)
