@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
+from random import random
 
 ##                         Problem 1                          ##
 ##                                                            ##
@@ -22,13 +23,43 @@ def iris_onehot(x : str) -> list[int]:
     return list(np.eye(len(iris))[index])
 
 def training(x_train : torch.Tensor, y_train : torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]: # DO NOT MODIFY FUNCTION NAME
-    pass ### IMPLEMENT FROM HERE
+    w = torch.tensor([ [ random() for j in range(4) ] for i in range(3) ], requires_grad=True)
+    b = torch.tensor([ [ random() ] for i in range(3) ], requires_grad=True)
+    o = torch.tensor([ [ 1.0 ] for i in range(x_train.shape[0]) ], requires_grad=True).transpose(0, 1)
+
+    my_lr = 0.01
+    epoch = 10000
+
+    optimizer = torch.optim.Adam([w, b], lr=my_lr)
+    loss = torch.nn.CrossEntropyLoss()
+
+    for i in range(epoch):
+        optimizer.zero_grad()
+
+        y = torch.matmul(w, x_train.transpose(0, 1)) + torch.matmul(b, o)
+
+        error = loss(y.transpose(0, 1), y_train)
+        error.backward()
+        optimizer.step()
+
+        #if i % 500 == 0:
+        #    print(error)
+
+    return w, b
+        
 
 def predict(x_train : torch.Tensor, y_train : torch.Tensor, x_test : torch.Tensor) -> torch.Tensor: # DO NOT MODIFY FUNCTION NAME
     # predict() should return the index of the answer.
     # Therefore, the return value is 1d-tensor that only contains 0, 1, 2. 
     w, b = training(x_train, y_train)
-    ### IMPLEMENT FROM HERE
+    
+    o = torch.tensor([ [ 1.0 ] for i in range(x_test.shape[0]) ]).transpose(0, 1)
+    y = (torch.matmul(w, x_test.transpose(0, 1)) + torch.matmul(b, o)).transpose(0, 1)
+
+    sm = torch.nn.Softmax()
+    y = sm(y)
+    
+    return torch.argmax(y, dim=1)
 
 if __name__ == "__main__":
     import csv
